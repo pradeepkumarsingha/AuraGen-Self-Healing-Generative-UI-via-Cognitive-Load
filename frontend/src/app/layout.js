@@ -1,0 +1,17 @@
+// frontend/app/layout.js
+import './globals.css';
+
+export const metadata = {
+  title: 'AuraGen — Education Loan',
+  description: 'Adaptive education loan application with cognitive load detection'
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className="bg-gray-50 text-gray-900">
+        {children}
+      </body>
+    </html>
+  );
+}
