@@ -464,9 +464,9 @@ This project is developed for educational, research, and project demonstration p
 
 B.Tech – Computer Science & Engineering (Artificial Intelligence)
 
-GitHub: `YOUR-GITHUB-USERNAME`
+Position: `GEN-AI Associate(L1)`
 
-LinkedIn: `YOUR-LINKEDIN-PROFILE`
+Company: `Infotact Solutions`
 
 ---
 
@@ -487,32 +487,3 @@ This project was developed as a full-stack AI application to explore the integra
 ## 📌 Disclaimer
 
 AuraGen AI is intended as a technology demonstration and decision-support application. Any AI-generated analysis or recommendation should not be considered a final financial or lending decision.
-
-````
-
-### One important change before you commit
-
-Your current project has:
-
-```text
-Backend/
-frontend/
-````
-
-So **keep one `README.md` at the root**:
-
-```text
-AuraGen-AI/
-├── Backend/
-├── frontend/
-├── .gitignore
-└── README.md   ← this README
-```
-
-Also, replace:
-
-```text
-Pradeep Kumar Singha
-Gen Ai Associate(L1)
-Infotact Solutions pvt.ltd
-```
