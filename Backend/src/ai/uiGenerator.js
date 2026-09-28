@@ -1,7 +1,8 @@
 // backend/src/ai/uiGenerator.js
 import dotenv from 'dotenv';
 dotenv.config();
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { ChatGroq } from '@langchain/groq';
+import { ChatOpenAI } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { validateUiSpec } from '../validation/uiSpecSchema.js';
 
@@ -130,24 +131,36 @@ const FALLBACK_SPECS = {
 };
 
 /**
- * Generates an adaptive, simplified step-by-step UI spec based on the user's friction metrics using LangChain & Gemini.
+ * Generates an adaptive, simplified step-by-step UI spec based on the user's friction metrics using Groq LLM.
  * @param {Object} context - { score, section, formState }
  * @returns {Object} Validated UI Specification
  */
 export async function generateAdaptiveUiSpec({ score, section = 'existingLoansAndCredit', formState = {} }) {
   console.log(`🤖 [AuraGen AI Generator] Generating adaptive UI spec for section: ${section} (Cognitive Friction: ${score}%)`);
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || process.env.AI_API_KEY;
+  const targetModel = process.env.AI_MODEL || 'openai/gpt-oss-120b';
 
   if (apiKey) {
     try {
-      console.log('⚡ [AuraGen LangChain Pipeline] Invoking Gemini LLM with UI Component Library Schema...');
+      console.log(`⚡ [AuraGen LangChain Pipeline] Invoking model: ${targetModel}...`);
       
-      const model = new ChatGoogleGenerativeAI({
-        model: 'gemini-1.5-flash',
-        apiKey,
-        temperature: 0.2
-      });
+      let model;
+      if (apiKey.startsWith('gsk_') || process.env.GROQ_API_KEY) {
+        model = new ChatGroq({
+          apiKey: apiKey,
+          model: targetModel,
+          temperature: 0.2
+        });
+      } else {
+        model = new ChatOpenAI({
+          apiKey: apiKey,
+          model: targetModel,
+          temperature: 0.2
+        });
+      }
+
+
 
       const promptTemplate = PromptTemplate.fromTemplate(`
 You are AuraGen UI Healing Engine, an expert system specializing in Generative UI and Cognitive Load reduction.
@@ -213,23 +226,38 @@ Return ONLY the raw JSON object, without markdown formatting or code blocks.
       const response = await model.invoke(formattedPrompt);
       const rawText = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
       
-      // Sanitize potential markdown fence if present
-      const cleanedJson = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-      const parsedSpec = JSON.parse(cleanedJson);
+      // Extract clean JSON from the LLM output
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No valid JSON returned by Groq model');
+      }
+
+      const parsedSpec = JSON.parse(jsonMatch[0]);
+
+      // Attach model metadata
+      parsedSpec.isLiveAi = true;
+      parsedSpec.generatedBy = targetModel;
+      parsedSpec.generatedAt = new Date().toLocaleTimeString();
 
       // Validate against Zod schema
       const validationResult = validateUiSpec(parsedSpec);
       if (validationResult.success) {
-        console.log('✅ [AuraGen LangChain Pipeline] Successfully generated and validated LLM UI Spec!');
-        return validationResult.data;
+        console.log(`✅ [AuraGen LangChain Pipeline] Successfully generated live UI Spec via ${targetModel}!`);
+        console.log(`📋 [LLM Reasoning]: "${validationResult.data.aiReasoning || 'N/A'}"`);
+        return {
+          ...validationResult.data,
+          isLiveAi: true,
+          generatedBy: targetModel,
+          generatedAt: new Date().toLocaleTimeString()
+        };
       } else {
-        console.warn('⚠️ [AuraGen LangChain Pipeline] LLM generated spec did not pass Zod schema. Falling back to static template:', validationResult.error);
+        console.warn('⚠️ [AuraGen LangChain Pipeline] Generated spec failed Zod validation. Falling back to static template:', validationResult.error);
       }
     } catch (llmError) {
-      console.error('⚠️ [AuraGen LangChain Pipeline] LLM generation error, falling back to verified spec:', llmError.message);
+      console.error(`⚠️ [AuraGen LangChain Pipeline] ${targetModel} generation error, falling back to verified spec:`, llmError.message);
     }
   } else {
-    console.log('ℹ️ [AuraGen AI Generator] No GEMINI_API_KEY found in environment. Using verified template.');
+    console.log('ℹ️ [AuraGen AI Generator] No GROQ_API_KEY or OPENAI_API_KEY found in environment. Using verified template.');
   }
 
   // Fallback to verified static spec
@@ -238,6 +266,13 @@ Return ONLY the raw JSON object, without markdown formatting or code blocks.
   if (!validationResult.success) {
     throw new Error('Default fallback UI Spec validation failed: ' + JSON.stringify(validationResult.error));
   }
-  return validationResult.data;
+  return {
+    ...validationResult.data,
+    isLiveAi: false,
+    generatedBy: 'Static Fallback Template',
+    generatedAt: new Date().toLocaleTimeString()
+  };
 }
 
+// Export alias
+export const generateUiSpec = generateAdaptiveUiSpec;

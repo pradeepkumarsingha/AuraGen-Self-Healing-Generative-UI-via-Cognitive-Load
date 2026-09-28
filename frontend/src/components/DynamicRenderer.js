@@ -44,9 +44,24 @@ export default function DynamicRenderer({ uiSpec, formData, updateField, onCompl
       {/* Generative UI Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-semibold tracking-wide uppercase mb-2">
-            <span className="animate-spin text-xs">✨</span> AuraGen Adaptive Interface
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-semibold tracking-wide uppercase">
+              <span className="animate-spin text-xs">✨</span> AuraGen Adaptive Interface
+            </span>
+            
+            {/* Live Model Verification Badge */}
+            {uiSpec.isLiveAi ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-medium shadow-[0_0_12px_rgba(52,211,153,0.15)]">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Live LLM: {uiSpec.generatedBy || 'openai/gpt-oss-120b'}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-medium">
+                Static Fallback Template
+              </span>
+            )}
           </div>
+
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
             {uiSpec.title || 'Simplified Guided Flow'}
           </h2>
@@ -57,24 +72,44 @@ export default function DynamicRenderer({ uiSpec, formData, updateField, onCompl
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={onCancel}
-          className="self-start sm:self-center text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition cursor-pointer"
-        >
-          {uiSpec.actions?.cancelLabel || 'Standard View'}
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-center">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition cursor-pointer"
+          >
+            {uiSpec.actions?.cancelLabel || 'Standard View'}
+          </button>
+        </div>
       </div>
 
       {/* AI Reasoning Pill */}
       {uiSpec.aiReasoning && (
         <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-start gap-3">
           <span className="text-sm">🤖</span>
-          <p className="text-xs text-indigo-200/90 leading-relaxed">
-            <strong className="text-indigo-100">AI Adaptation Trigger:</strong> {uiSpec.aiReasoning}
-          </p>
+          <div className="space-y-1">
+            <p className="text-xs text-indigo-200/90 leading-relaxed">
+              <strong className="text-indigo-100">AI Reasoning:</strong> {uiSpec.aiReasoning}
+            </p>
+            {uiSpec.generatedAt && (
+              <span className="text-[10px] font-mono text-indigo-400/70 block">
+                Generated live at {uiSpec.generatedAt}
+              </span>
+            )}
+          </div>
         </div>
       )}
+
+      {/* Raw JSON Spec Inspector Drawer */}
+      <details className="text-xs text-slate-400 bg-slate-950/50 p-3 rounded-xl border border-slate-800/80 cursor-pointer">
+        <summary className="font-mono text-[11px] text-slate-400 hover:text-indigo-300 select-none">
+          🔍 Inspect Raw AI-Generated JSON Specification
+        </summary>
+        <pre className="mt-2.5 p-3 rounded-lg bg-slate-950 text-[11px] font-mono text-emerald-400/90 overflow-x-auto border border-slate-800 max-h-52 overflow-y-auto">
+          {JSON.stringify(uiSpec, null, 2)}
+        </pre>
+      </details>
+
 
       {/* Step Progress Indicators */}
       <div className="space-y-2">
