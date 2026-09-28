@@ -1,14 +1,13 @@
 // backend/src/server.js
+import 'dotenv/config';
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import { Server } from 'socket.io';
-import dotenv from 'dotenv';
 
 import healthRoutes from './routes/health.js';
 import { initSocketHandlers } from './websocket/socketHandlers.js';
 
-dotenv.config();
 
 const app = express();
 app.use(cors({

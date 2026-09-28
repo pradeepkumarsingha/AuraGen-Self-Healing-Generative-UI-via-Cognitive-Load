@@ -11,6 +11,11 @@ export function useCognitiveLoad() {
   const hesitationTimerRef = useRef(null);
   const switchCountRef = useRef(0);
 
+  // Mouse & click telemetry refs
+  const lastMousePosRef = useRef({ x: 0, y: 0, time: Date.now() });
+  const mouseTrajectoryRef = useRef([]);
+  const clickHistoryRef = useRef([]);
+
   // Helper to get cognitive level label
   const getLevel = (val) => {
     if (val <= 30) return 'Normal';
@@ -92,18 +97,75 @@ export function useCognitiveLoad() {
     activeFieldRef.current = null;
     fieldValuesRef.current = {};
     switchCountRef.current = 0;
+    mouseTrajectoryRef.current = [];
+    clickHistoryRef.current = [];
     setScore(15);
     console.log('🔄 [CognitiveLoad] Reset to baseline (15%)');
   }, []);
 
-  // Cleanup on unmount
+  // 5. Global Mouse Velocity & Rage Click Telemetry Tracker
   useEffect(() => {
+    let lastJitterAlert = 0;
+    let lastVelocitySample = Date.now();
+
+    const handleMouseMove = (e) => {
+      const now = Date.now();
+      const dt = now - lastVelocitySample;
+      if (dt < 60) return; // Sample every 60ms
+
+      const dx = e.clientX - lastMousePosRef.current.x;
+      const dy = e.clientY - lastMousePosRef.current.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const velocity = distance / dt; // pixels per ms
+
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY, time: now };
+      lastVelocitySample = now;
+
+      // Keep recent trajectory angles to detect erratic searching/shaking
+      const trajectory = mouseTrajectoryRef.current;
+      trajectory.push({ x: e.clientX, y: e.clientY, velocity, time: now });
+      if (trajectory.length > 8) trajectory.shift();
+
+      // Detect frantic cursor shaking / rapid multi-directional hunting
+      if (trajectory.length >= 6 && now - lastJitterAlert > 4000) {
+        let directionFlips = 0;
+        for (let i = 2; i < trajectory.length; i++) {
+          const v1x = trajectory[i - 1].x - trajectory[i - 2].x;
+          const v2x = trajectory[i].x - trajectory[i - 1].x;
+          if (v1x * v2x < -100) directionFlips += 1;
+        }
+
+        if (directionFlips >= 3 && velocity > 0.8) {
+          lastJitterAlert = now;
+          applyScoreDelta(10, 'erratic cursor jitter / search agitation');
+        }
+      }
+    };
+
+    // Rage click detector (3+ rapid clicks in <= 600ms)
+    const handleClick = () => {
+      const now = Date.now();
+      clickHistoryRef.current.push(now);
+      // Keep only clicks within the last 600ms
+      clickHistoryRef.current = clickHistoryRef.current.filter((t) => now - t <= 600);
+
+      if (clickHistoryRef.current.length >= 3) {
+        applyScoreDelta(14, 'rage clicking / frustration burst');
+        clickHistoryRef.current = [];
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('click', handleClick);
+
     return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('click', handleClick);
       if (hesitationTimerRef.current) {
         clearTimeout(hesitationTimerRef.current);
       }
     };
-  }, []);
+  }, [applyScoreDelta]);
 
   return {
     score,
@@ -115,3 +177,4 @@ export function useCognitiveLoad() {
     applyScoreDelta
   };
 }
+
