@@ -14,6 +14,8 @@ export default function Home() {
   const {
     score,
     level,
+    activeSection,
+    activeField,
     recordFocus,
     recordChange,
     recordError,
@@ -29,27 +31,32 @@ export default function Home() {
   // When backend sends AURAGEN_TRIGGERED with a UI Spec, mount the dynamic generative UI
   useEffect(() => {
     if (lastTrigger?.uiSpec) {
-      console.log('✨ [AuraGen UI Healing] Mounting dynamic AI-generated UI spec...');
-      setActiveUiSpec(lastTrigger.uiSpec);
+      console.log(`✨ [AuraGen UI Healing] Mounting dynamic UI spec for section: "${lastTrigger.uiSpec.targetSection || lastTrigger.section}"...`);
+      // Do not mutate previous UI spec directly; replace with clean clone
+      setActiveUiSpec({ ...lastTrigger.uiSpec });
     }
   }, [lastTrigger]);
 
   // Monitor score and emit COGNITIVE_LOAD_HIGH when score > 80
   useEffect(() => {
     if (score > 80 && !hasTriggeredRef.current && isConnected && socket) {
-      console.log('🚨 [Telemetry Threshold Exceeded] Cognitive load score > 80! Emitting COGNITIVE_LOAD_HIGH...');
+      const targetSec = activeSection || 'studentInfo';
+      const targetField = activeField || 'fullName';
+      console.log(`[Frontend Telemetry] Selected section: "${targetSec}", active field: "${targetField}"`);
+      console.log(`[Frontend Telemetry] Emitting COGNITIVE_LOAD_HIGH: section="${targetSec}", field="${targetField}", score=${score}%`);
       hasTriggeredRef.current = true;
 
       socket.emit('COGNITIVE_LOAD_HIGH', {
         score,
         page: 'education-loan',
-        section: 'existingLoansAndCredit',
+        section: targetSec,
+        field: targetField,
         formState: formData
       });
     } else if (score <= 80) {
       hasTriggeredRef.current = false;
     }
-  }, [score, isConnected, socket, formData]);
+  }, [score, isConnected, socket, formData, activeSection, activeField]);
 
   const handleResetTelemetry = () => {
     reset();

@@ -2,15 +2,15 @@
 'use client';
 
 export default function LoanForm({ formData, updateField, onSubmit, onRecordFocus, onRecordChange }) {
-  const handleInputChange = (field) => (e) => {
+  const handleInputChange = (field, section) => (e) => {
     updateField(field, e.target.value);
-    onRecordChange?.(field, e.target.value);
+    onRecordChange?.(field, e.target.value, section);
   };
 
-  const handleRadioChange = (field) => (e) => {
+  const handleRadioChange = (field, section) => (e) => {
     const value = e.target.value;
     updateField(field, value);
-    onRecordChange?.(field, value);
+    onRecordChange?.(field, value, section);
 
     if (field === 'hasExistingLoan' && value === 'No') {
       // Clear existing loan fields when "No" is selected
@@ -21,14 +21,14 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
     }
   };
 
-  const handleFileChange = (field) => (e) => {
+  const handleFileChange = (field, section) => (e) => {
     const file = e.target.files[0] || null;
     updateField(field, file ? file.name : null);
-    onRecordChange?.(field, file ? file.name : null);
+    onRecordChange?.(field, file ? file.name : null, section);
   };
 
-  const handleFocus = (field) => () => {
-    onRecordFocus?.(field);
+  const handleFocus = (field, section) => () => {
+    onRecordFocus?.(field, section);
   };
 
   const handleSubmit = (e) => {
@@ -60,8 +60,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               required
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.fullName || ''}
-              onChange={handleInputChange('fullName')}
-              onFocus={handleFocus('fullName')}
+              onChange={handleInputChange('fullName', 'studentInfo')}
+              onFocus={handleFocus('fullName', 'studentInfo')}
               placeholder="e.g. Johnathan Doe"
             />
           </div>
@@ -74,8 +74,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               type="date"
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.dob || ''}
-              onChange={handleInputChange('dob')}
-              onFocus={handleFocus('dob')}
+              onChange={handleInputChange('dob', 'studentInfo')}
+              onFocus={handleFocus('dob', 'studentInfo')}
             />
           </div>
 
@@ -88,8 +88,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               required
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.email || ''}
-              onChange={handleInputChange('email')}
-              onFocus={handleFocus('email')}
+              onChange={handleInputChange('email', 'studentInfo')}
+              onFocus={handleFocus('email', 'studentInfo')}
               placeholder="student@example.edu"
             />
           </div>
@@ -103,8 +103,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               required
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.phone || ''}
-              onChange={handleInputChange('phone')}
-              onFocus={handleFocus('phone')}
+              onChange={handleInputChange('phone', 'studentInfo')}
+              onFocus={handleFocus('phone', 'studentInfo')}
               placeholder="+91 9876543210"
             />
           </div>
@@ -133,8 +133,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               required
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.college || ''}
-              onChange={handleInputChange('college')}
-              onFocus={handleFocus('college')}
+              onChange={handleInputChange('college', 'academicInfo')}
+              onFocus={handleFocus('college', 'academicInfo')}
               placeholder="e.g. Indian Institute of Technology"
             />
           </div>
@@ -147,8 +147,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               type="text"
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.course || ''}
-              onChange={handleInputChange('course')}
-              onFocus={handleFocus('course')}
+              onChange={handleInputChange('course', 'academicInfo')}
+              onFocus={handleFocus('course', 'academicInfo')}
               placeholder="e.g. B.Tech Computer Science"
             />
           </div>
@@ -161,8 +161,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               type="text"
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.specialization || ''}
-              onChange={handleInputChange('specialization')}
-              onFocus={handleFocus('specialization')}
+              onChange={handleInputChange('specialization', 'academicInfo')}
+              onFocus={handleFocus('specialization', 'academicInfo')}
               placeholder="e.g. Artificial Intelligence & Data Science"
             />
           </div>
@@ -179,8 +179,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
                 max="10"
                 className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 value={formData.cgpa || ''}
-                onChange={handleInputChange('cgpa')}
-                onFocus={handleFocus('cgpa')}
+                onChange={handleInputChange('cgpa', 'academicInfo')}
+                onFocus={handleFocus('cgpa', 'academicInfo')}
                 placeholder="8.5"
               />
             </div>
@@ -191,8 +191,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               <select
                 className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 value={formData.yearOfStudy || ''}
-                onChange={handleInputChange('yearOfStudy')}
-                onFocus={handleFocus('yearOfStudy')}
+                onChange={handleInputChange('yearOfStudy', 'academicInfo')}
+                onFocus={handleFocus('yearOfStudy', 'academicInfo')}
               >
                 <option value="">Select Year</option>
                 <option value="1">1st Year</option>
@@ -229,8 +229,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               min="1"
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.loanAmount || ''}
-              onChange={handleInputChange('loanAmount')}
-              onFocus={handleFocus('loanAmount')}
+              onChange={handleInputChange('loanAmount', 'loanInfo')}
+              onFocus={handleFocus('loanAmount', 'loanInfo')}
               placeholder="e.g. 1200000"
             />
           </div>
@@ -243,8 +243,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               <select
                 className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 value={formData.studyLocation || ''}
-                onChange={handleInputChange('studyLocation')}
-                onFocus={handleFocus('studyLocation')}
+                onChange={handleInputChange('studyLocation', 'studyLocation')}
+                onFocus={handleFocus('studyLocation', 'studyLocation')}
               >
                 <option value="">Select Location</option>
                 <option value="India">India</option>
@@ -261,8 +261,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
                 max="10"
                 className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 value={formData.courseDuration || ''}
-                onChange={handleInputChange('courseDuration')}
-                onFocus={handleFocus('courseDuration')}
+                onChange={handleInputChange('courseDuration', 'studyLocation')}
+                onFocus={handleFocus('courseDuration', 'studyLocation')}
                 placeholder="4"
               />
             </div>
@@ -276,8 +276,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               rows={3}
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"
               value={formData.purpose || ''}
-              onChange={handleInputChange('purpose')}
-              onFocus={handleFocus('purpose')}
+              onChange={handleInputChange('purpose', 'studyLocation')}
+              onFocus={handleFocus('purpose', 'studyLocation')}
               placeholder="Breakdown of tuition, accommodation, books, lab expenses, etc."
             />
           </div>
@@ -309,7 +309,7 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
                 value="Yes"
                 className="w-4 h-4 text-indigo-500 bg-slate-900 border-slate-700 focus:ring-indigo-500"
                 checked={formData.hasExistingLoan === 'Yes'}
-                onChange={handleRadioChange('hasExistingLoan')}
+                onChange={handleRadioChange('hasExistingLoan', 'existingLoansAndCredit')}
               />
               <span className="font-medium">Yes</span>
             </label>
@@ -320,7 +320,7 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
                 value="No"
                 className="w-4 h-4 text-indigo-500 bg-slate-900 border-slate-700 focus:ring-indigo-500"
                 checked={formData.hasExistingLoan === 'No'}
-                onChange={handleRadioChange('hasExistingLoan')}
+                onChange={handleRadioChange('hasExistingLoan', 'existingLoansAndCredit')}
               />
               <span className="font-medium">No</span>
             </label>
@@ -334,8 +334,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
                 <select
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={formData.existingLoanType || ''}
-                  onChange={handleInputChange('existingLoanType')}
-                  onFocus={handleFocus('existingLoanType')}
+                  onChange={handleInputChange('existingLoanType', 'existingLoansAndCredit')}
+                  onFocus={handleFocus('existingLoanType', 'existingLoansAndCredit')}
                 >
                   <option value="">Select Type</option>
                   <option value="Education">Education</option>
@@ -353,8 +353,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
                   min="0"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={formData.existingLoanAmount || ''}
-                  onChange={handleInputChange('existingLoanAmount')}
-                  onFocus={handleFocus('existingLoanAmount')}
+                  onChange={handleInputChange('existingLoanAmount', 'existingLoansAndCredit')}
+                  onFocus={handleFocus('existingLoanAmount', 'existingLoansAndCredit')}
                   placeholder="e.g. 250000"
                 />
               </div>
@@ -366,8 +366,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
                   min="0"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={formData.existingLoanEmi || ''}
-                  onChange={handleInputChange('existingLoanEmi')}
-                  onFocus={handleFocus('existingLoanEmi')}
+                  onChange={handleInputChange('existingLoanEmi', 'existingLoansAndCredit')}
+                  onFocus={handleFocus('existingLoanEmi', 'existingLoansAndCredit')}
                   placeholder="e.g. 8500"
                 />
               </div>
@@ -379,8 +379,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
                   min="0"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={formData.existingLoanRemaining || ''}
-                  onChange={handleInputChange('existingLoanRemaining')}
-                  onFocus={handleFocus('existingLoanRemaining')}
+                  onChange={handleInputChange('existingLoanRemaining', 'existingLoansAndCredit')}
+                  onFocus={handleFocus('existingLoanRemaining', 'existingLoansAndCredit')}
                   placeholder="e.g. 24"
                 />
               </div>
@@ -404,8 +404,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
                 max="900"
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={formData.creditScore || ''}
-                onChange={handleInputChange('creditScore')}
-                onFocus={handleFocus('creditScore')}
+                onChange={handleInputChange('creditScore', 'existingLoansAndCredit')}
+                onFocus={handleFocus('creditScore', 'existingLoansAndCredit')}
                 placeholder="e.g. 780"
               />
             </div>
@@ -463,8 +463,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
             <select
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.coApplicantRelation || ''}
-              onChange={handleInputChange('coApplicantRelation')}
-              onFocus={handleFocus('coApplicantRelation')}
+              onChange={handleInputChange('coApplicantRelation', 'coApplicantInfo')}
+              onFocus={handleFocus('coApplicantRelation', 'coApplicantInfo')}
             >
               <option value="">Select Relationship</option>
               <option value="Father">Father</option>
@@ -482,8 +482,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               type="text"
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.coApplicantOccupation || ''}
-              onChange={handleInputChange('coApplicantOccupation')}
-              onFocus={handleFocus('coApplicantOccupation')}
+              onChange={handleInputChange('coApplicantOccupation', 'coApplicantInfo')}
+              onFocus={handleFocus('coApplicantOccupation', 'coApplicantInfo')}
               placeholder="e.g. Senior Software Engineer"
             />
           </div>
@@ -498,8 +498,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
               min="1"
               className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               value={formData.annualIncome || ''}
-              onChange={handleInputChange('annualIncome')}
-              onFocus={handleFocus('annualIncome')}
+              onChange={handleInputChange('annualIncome', 'coApplicantInfo')}
+              onFocus={handleFocus('annualIncome', 'coApplicantInfo')}
               placeholder="e.g. 1500000"
             />
           </div>
@@ -529,8 +529,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
             <input
               type="file"
               className="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
-              onChange={handleFileChange('admissionLetter')}
-              onFocus={handleFocus('admissionLetter')}
+              onChange={handleFileChange('admissionLetter', 'documents')}
+              onFocus={handleFocus('admissionLetter', 'documents')}
             />
           </div>
 
@@ -544,8 +544,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
             <input
               type="file"
               className="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
-              onChange={handleFileChange('incomeProof')}
-              onFocus={handleFocus('incomeProof')}
+              onChange={handleFileChange('incomeProof', 'documents')}
+              onFocus={handleFocus('incomeProof', 'documents')}
             />
           </div>
 
@@ -559,8 +559,8 @@ export default function LoanForm({ formData, updateField, onSubmit, onRecordFocu
             <input
               type="file"
               className="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
-              onChange={handleFileChange('academicCertificate')}
-              onFocus={handleFocus('academicCertificate')}
+              onChange={handleFileChange('academicCertificate', 'documents')}
+              onFocus={handleFocus('academicCertificate', 'documents')}
             />
           </div>
         </div>

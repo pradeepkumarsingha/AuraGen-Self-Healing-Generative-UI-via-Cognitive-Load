@@ -1,12 +1,67 @@
 // frontend/hooks/useCognitiveLoad.js
 import { useState, useRef, useEffect, useCallback } from 'react';
 
+export const FIELD_TO_SECTION_MAP = {
+  // Study Location & Program
+  studyLocation: 'studyLocation',
+  courseDuration: 'studyLocation',
+  country: 'studyLocation',
+  city: 'studyLocation',
+  university: 'studyLocation',
+  intake: 'studyLocation',
+  studyLevel: 'studyLocation',
+  purpose: 'studyLocation',
+
+  // Existing Loans & Credit
+  hasExistingLoan: 'existingLoansAndCredit',
+  existingLoanType: 'existingLoansAndCredit',
+  existingLoanAmount: 'existingLoansAndCredit',
+  existingLoanEmi: 'existingLoansAndCredit',
+  existingLoanRemaining: 'existingLoansAndCredit',
+  creditScore: 'existingLoansAndCredit',
+  creditScoreSource: 'existingLoansAndCredit',
+  creditVerificationStatus: 'existingLoansAndCredit',
+  creditRemarks: 'existingLoansAndCredit',
+  monthlyEmi: 'existingLoansAndCredit',
+  outstandingBalance: 'existingLoansAndCredit',
+  lenderName: 'existingLoansAndCredit',
+
+  // Student Info
+  fullName: 'studentInfo',
+  dob: 'studentInfo',
+  email: 'studentInfo',
+  phone: 'studentInfo',
+
+  // Academic Info
+  college: 'academicInfo',
+  course: 'academicInfo',
+  specialization: 'academicInfo',
+  cgpa: 'academicInfo',
+  yearOfStudy: 'academicInfo',
+
+  // Loan Info
+  loanAmount: 'loanInfo',
+
+  // Co-applicant Info
+  coApplicantRelation: 'coApplicantInfo',
+  coApplicantOccupation: 'coApplicantInfo',
+  annualIncome: 'coApplicantInfo',
+
+  // Documents
+  admissionLetter: 'documents',
+  incomeProof: 'documents',
+  academicCertificate: 'documents'
+};
+
 export function useCognitiveLoad() {
   const [score, setScore] = useState(15); // baseline starting load
+  const [activeSection, setActiveSection] = useState('studentInfo');
+  const [activeField, setActiveField] = useState('fullName');
 
   // Telemetry refs to track interaction metrics without re-renders
   const focusTimeRef = useRef(null);
-  const activeFieldRef = useRef(null);
+  const activeFieldRef = useRef('fullName');
+  const activeSectionRef = useRef('studentInfo');
   const fieldValuesRef = useRef({});
   const hesitationTimerRef = useRef(null);
   const switchCountRef = useRef(0);
@@ -35,13 +90,20 @@ export function useCognitiveLoad() {
   }, []);
 
   // 1. Focus Tracking & Hesitation Timer
-  const recordFocus = useCallback((field) => {
+  const recordFocus = useCallback((field, explicitSection = null) => {
     if (hesitationTimerRef.current) {
       clearTimeout(hesitationTimerRef.current);
     }
 
     const now = Date.now();
     const prevField = activeFieldRef.current;
+    const determinedSection = explicitSection || FIELD_TO_SECTION_MAP[field] || 'studentInfo';
+
+    activeFieldRef.current = field;
+    activeSectionRef.current = determinedSection;
+    setActiveField(field);
+    setActiveSection(determinedSection);
+    console.log(`🎯 [Frontend Telemetry] Focused field: "${field}" -> Active Section: "${determinedSection}"`);
 
     // Field switching without typing in previous field (hopping/hesitation)
     if (prevField && prevField !== field) {
@@ -65,11 +127,17 @@ export function useCognitiveLoad() {
   }, [applyScoreDelta]);
 
   // 2. Change Tracking & Deletion/Backtracking Detection
-  const recordChange = useCallback((field, value) => {
+  const recordChange = useCallback((field, value, explicitSection = null) => {
     // Clear hesitation timer on active typing
     if (hesitationTimerRef.current) {
       clearTimeout(hesitationTimerRef.current);
       hesitationTimerRef.current = null;
+    }
+
+    const determinedSection = explicitSection || FIELD_TO_SECTION_MAP[field] || activeSectionRef.current;
+    if (determinedSection && determinedSection !== activeSectionRef.current) {
+      activeSectionRef.current = determinedSection;
+      setActiveSection(determinedSection);
     }
 
     const strVal = typeof value === 'string' ? value : '';
@@ -170,6 +238,9 @@ export function useCognitiveLoad() {
   return {
     score,
     level: getLevel(score),
+    activeSection,
+    setActiveSection,
+    activeField: activeFieldRef.current,
     recordFocus,
     recordChange,
     recordError,

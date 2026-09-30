@@ -26,7 +26,306 @@ Layout Formats:
 - "step-by-step": Step wizard splitting complex multi-field forms into sequential, low-cognitive-load screens.
 `;
 
-const FALLBACK_SPECS = {
+export const FALLBACK_SPECS = {
+  studentInfo: {
+    version: '1.0',
+    layout: 'step-by-step',
+    targetSection: 'studentInfo',
+    title: 'AuraGen Assistant: Personal Information',
+    subtitle: 'Let’s breeze through your personal contact details step-by-step.',
+    aiReasoning: 'Deconstructed applicant identity and contact fields into simple, single-focus steps to eliminate typing friction.',
+    steps: [
+      {
+        id: 'step-applicant-name',
+        title: 'Step 1: Your Name & Date of Birth',
+        description: 'Provide your official legal name as printed on government IDs.',
+        fields: [
+          {
+            id: 'field-full-name',
+            name: 'fullName',
+            label: 'Full Name',
+            type: 'text',
+            required: true,
+            placeholder: 'e.g. Johnathan Doe',
+            helperText: 'As per Aadhaar, Passport, or 10th marksheet'
+          },
+          {
+            id: 'field-dob',
+            name: 'dob',
+            label: 'Date of Birth',
+            type: 'date',
+            required: false,
+            helperText: 'Required for eligibility verification'
+          }
+        ]
+      },
+      {
+        id: 'step-applicant-contact',
+        title: 'Step 2: Contact Information',
+        description: 'Where should we send your loan approval updates?',
+        fields: [
+          {
+            id: 'field-email',
+            name: 'email',
+            label: 'Email Address',
+            type: 'email',
+            required: true,
+            placeholder: 'student@example.edu',
+            helperText: 'We will send sanction letters to this address.'
+          },
+          {
+            id: 'field-phone',
+            name: 'phone',
+            label: 'Mobile Number',
+            type: 'tel',
+            required: true,
+            placeholder: '+91 9876543210',
+            helperText: 'Used for instant OTP verification.'
+          }
+        ]
+      }
+    ],
+    actions: {
+      submitLabel: 'Apply & Return to Application',
+      cancelLabel: 'Use Standard View'
+    }
+  },
+
+  academicInfo: {
+    version: '1.0',
+    layout: 'step-by-step',
+    targetSection: 'academicInfo',
+    title: 'AuraGen Assistant: Academic Background',
+    subtitle: 'Quickly specify your enrolled institution and academic credentials.',
+    aiReasoning: 'Split institutional enrollment, specialization, and GPA metrics into sequential focused steps.',
+    steps: [
+      {
+        id: 'step-academic-college',
+        title: 'Step 1: College & Degree Course',
+        description: 'Specify where you are studying and your degree program.',
+        fields: [
+          {
+            id: 'field-college',
+            name: 'college',
+            label: 'College / University Name',
+            type: 'text',
+            required: true,
+            placeholder: 'e.g. Indian Institute of Technology',
+            helperText: 'Select your registered higher education institution.'
+          },
+          {
+            id: 'field-course',
+            name: 'course',
+            label: 'Degree / Course Name',
+            type: 'text',
+            placeholder: 'e.g. B.Tech Computer Science',
+            helperText: 'Your enrolled or prospective degree program'
+          },
+          {
+            id: 'field-specialization',
+            name: 'specialization',
+            label: 'Specialization / Major',
+            type: 'text',
+            placeholder: 'e.g. Artificial Intelligence & Data Science'
+          }
+        ]
+      },
+      {
+        id: 'step-academic-grades',
+        title: 'Step 2: Academic Performance & Year',
+        description: 'Review your current grade point average and academic standing.',
+        fields: [
+          {
+            id: 'field-cgpa',
+            name: 'cgpa',
+            label: 'CGPA / Percentage (0 - 10)',
+            type: 'number',
+            min: 0,
+            max: 10,
+            step: 0.01,
+            placeholder: '8.5',
+            helperText: 'Enter your latest cumulative GPA score.'
+          },
+          {
+            id: 'field-year-of-study',
+            name: 'yearOfStudy',
+            label: 'Current Year of Study',
+            type: 'select',
+            options: [
+              { label: '1st Year', value: '1' },
+              { label: '2nd Year', value: '2' },
+              { label: '3rd Year', value: '3' },
+              { label: '4th Year', value: '4' },
+              { label: '5+ Year', value: '5+' }
+            ]
+          }
+        ]
+      }
+    ],
+    actions: {
+      submitLabel: 'Apply & Return to Application',
+      cancelLabel: 'Use Standard View'
+    }
+  },
+
+  loanInfo: {
+    version: '1.0',
+    layout: 'step-by-step',
+    targetSection: 'loanInfo',
+    title: 'AuraGen Assistant: Loan Amount & Purpose',
+    subtitle: 'Customize your loan financing requirements effortlessly.',
+    aiReasoning: 'Simplifies financial calculations by separating loan sizing from expense purpose descriptions.',
+    steps: [
+      {
+        id: 'step-loan-req',
+        title: 'Step 1: Required Loan Amount',
+        description: 'How much total financing do you need for your education?',
+        fields: [
+          {
+            id: 'field-loan-amount',
+            name: 'loanAmount',
+            label: 'Required Loan Amount (₹)',
+            type: 'number',
+            required: true,
+            min: 10000,
+            placeholder: 'e.g. 1200000',
+            helperText: 'Includes tuition, hostel, equipment, and living allowances.'
+          }
+        ]
+      },
+      {
+        id: 'step-loan-breakdown',
+        title: 'Step 2: Purpose & Expense Breakdown',
+        description: 'Specify which academic costs this loan will cover.',
+        fields: [
+          {
+            id: 'field-purpose',
+            name: 'purpose',
+            label: 'Expense Coverage Summary',
+            type: 'textarea',
+            placeholder: 'e.g. Tuition fee (₹8L), campus accommodation (₹2L), laptop & books (₹2L)...',
+            helperText: 'Briefly list the primary expenses covered by the requested loan.'
+          }
+        ]
+      }
+    ],
+    actions: {
+      submitLabel: 'Apply & Return to Application',
+      cancelLabel: 'Use Standard View'
+    }
+  },
+
+  studyLocation: {
+    version: '1.0',
+    layout: 'step-by-step',
+    targetSection: 'studyLocation',
+    title: 'AuraGen Assistant: Study Location & Academic Plan',
+    subtitle: 'We simplified this step to help you select your destination and program easily.',
+    aiReasoning: 'Detected cognitive friction while configuring study destination. Guided step-by-step breakdown for location, academic institution, and program duration.',
+    steps: [
+      {
+        id: 'step-study-destination',
+        title: 'Step 1: Study Destination',
+        description: 'Where do you plan to pursue your education?',
+        fields: [
+          {
+            id: 'field-study-location',
+            name: 'studyLocation',
+            label: 'Study Location',
+            type: 'select',
+            required: true,
+            options: [
+              { label: 'India', value: 'India' },
+              { label: 'Abroad', value: 'Abroad' }
+            ],
+            helperText: 'Select India for domestic universities, or Abroad for international education.'
+          },
+          {
+            id: 'field-destination-country',
+            name: 'country',
+            label: 'Destination Country',
+            type: 'select',
+            options: [
+              { label: 'United States', value: 'USA' },
+              { label: 'United Kingdom', value: 'UK' },
+              { label: 'Canada', value: 'Canada' },
+              { label: 'Germany', value: 'Germany' },
+              { label: 'Australia', value: 'Australia' },
+              { label: 'Other Country', value: 'Other' }
+            ],
+            dependsOn: { field: 'studyLocation', value: 'Abroad' },
+            helperText: 'Select your host country of study.'
+          },
+          {
+            id: 'field-destination-city',
+            name: 'city',
+            label: 'City / Campus Region',
+            type: 'text',
+            placeholder: 'e.g. Boston, London, Toronto',
+            dependsOn: { field: 'studyLocation', value: 'Abroad' }
+          }
+        ]
+      },
+      {
+        id: 'step-university-program',
+        title: 'Step 2: University & Program Details',
+        description: 'Provide details about your enrolled or prospective institution.',
+        fields: [
+          {
+            id: 'field-university-name',
+            name: 'university',
+            label: 'Target University / Institute',
+            type: 'text',
+            placeholder: 'e.g. Harvard University or IIT Bombay',
+            required: false,
+            helperText: 'Name of the college or university you plan to attend.'
+          },
+          {
+            id: 'field-course-duration',
+            name: 'courseDuration',
+            label: 'Program Duration (Years)',
+            type: 'number',
+            min: 1,
+            max: 10,
+            placeholder: '4',
+            helperText: 'Total standard duration of the degree course.'
+          },
+          {
+            id: 'field-study-level',
+            name: 'studyLevel',
+            label: 'Degree Level',
+            type: 'select',
+            options: [
+              { label: 'Undergraduate / Bachelors', value: 'Undergraduate' },
+              { label: 'Postgraduate / Masters', value: 'Masters' },
+              { label: 'Doctorate / PhD', value: 'PhD' },
+              { label: 'Diploma / Certificate', value: 'Diploma' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'step-study-purpose',
+        title: 'Step 3: Purpose of Loan',
+        description: 'Briefly explain what financing coverage you require.',
+        fields: [
+          {
+            id: 'field-loan-purpose',
+            name: 'purpose',
+            label: 'Primary Expense Coverage',
+            type: 'textarea',
+            placeholder: 'e.g. Tuition fee, campus accommodation, living costs, books, lab equipments...',
+            helperText: 'Provide a brief summary of tuition and living expenses.'
+          }
+        ]
+      }
+    ],
+    actions: {
+      submitLabel: 'Apply & Return to Application',
+      cancelLabel: 'Use Standard View'
+    }
+  },
+
   existingLoansAndCredit: {
     version: '1.0',
     layout: 'step-by-step',
@@ -127,28 +426,267 @@ const FALLBACK_SPECS = {
       submitLabel: 'Apply & Return to Application',
       cancelLabel: 'Use Standard View'
     }
+  },
+
+  coApplicantInfo: {
+    version: '1.0',
+    layout: 'step-by-step',
+    targetSection: 'coApplicantInfo',
+    title: 'AuraGen Assistant: Co-applicant Information',
+    subtitle: 'Add details for your co-borrower or guarantor.',
+    aiReasoning: 'Guides co-signer relationship and financial capacity evaluation through step-by-step entry.',
+    steps: [
+      {
+        id: 'step-coapplicant-relation',
+        title: 'Step 1: Co-applicant Relationship',
+        description: 'Who will be your primary co-borrower or guarantor?',
+        fields: [
+          {
+            id: 'field-coapplicant-relation',
+            name: 'coApplicantRelation',
+            label: 'Relationship to Applicant',
+            type: 'select',
+            required: true,
+            options: [
+              { label: 'Father', value: 'Father' },
+              { label: 'Mother', value: 'Mother' },
+              { label: 'Guardian', value: 'Guardian' },
+              { label: 'Other', value: 'Other' }
+            ],
+            helperText: 'Parent or legal guardian is recommended for quick approval.'
+          }
+        ]
+      },
+      {
+        id: 'step-coapplicant-finances',
+        title: 'Step 2: Occupation & Income',
+        description: 'Provide employment and annual earning details.',
+        fields: [
+          {
+            id: 'field-coapplicant-occupation',
+            name: 'coApplicantOccupation',
+            label: 'Primary Occupation',
+            type: 'text',
+            placeholder: 'e.g. Senior Software Engineer / Business Owner'
+          },
+          {
+            id: 'field-coapplicant-income',
+            name: 'annualIncome',
+            label: 'Annual Income (₹)',
+            type: 'number',
+            required: true,
+            min: 100000,
+            placeholder: 'e.g. 1500000',
+            helperText: 'Gross annual family income before tax.'
+          }
+        ]
+      }
+    ],
+    actions: {
+      submitLabel: 'Apply & Return to Application',
+      cancelLabel: 'Use Standard View'
+    }
+  },
+
+  documents: {
+    version: '1.0',
+    layout: 'step-by-step',
+    targetSection: 'documents',
+    title: 'AuraGen Assistant: Documents Verification',
+    subtitle: 'Upload essential KYC and admission proofs easily.',
+    aiReasoning: 'Breaks document verification into a guided checklist for quick completion.',
+    steps: [
+      {
+        id: 'step-docs-academic',
+        title: 'Step 1: University Admission & Academic Letter',
+        description: 'Verify your admission offer and degree records.',
+        fields: [
+          {
+            id: 'field-admission-letter',
+            name: 'admissionLetter',
+            label: 'University Admission / Offer Letter',
+            type: 'text',
+            placeholder: 'e.g. Harvard_Offer_Letter.pdf',
+            helperText: 'Official university letter stating course and tuition fee.'
+          },
+          {
+            id: 'field-academic-certificate',
+            name: 'academicCertificate',
+            label: 'Academic Certificate / Marksheets',
+            type: 'text',
+            placeholder: 'e.g. 10th_12th_BTech_Marksheets.pdf'
+          }
+        ]
+      },
+      {
+        id: 'step-docs-income',
+        title: 'Step 2: Income Proof',
+        description: 'Upload salary slip or ITR of co-applicant.',
+        fields: [
+          {
+            id: 'field-income-proof',
+            name: 'incomeProof',
+            label: 'Co-applicant Income Proof / ITR',
+            type: 'text',
+            placeholder: 'e.g. Form_16_Salary_Slip.pdf',
+            helperText: 'Last 3 months salary slip or ITR statement.'
+          }
+        ]
+      }
+    ],
+    actions: {
+      submitLabel: 'Apply & Return to Application',
+      cancelLabel: 'Use Standard View'
+    }
+  },
+
+  generic: {
+    version: '1.0',
+    layout: 'step-by-step',
+    targetSection: 'general',
+    title: 'AuraGen Smart Assistant: Guided Flow',
+    subtitle: 'Simplified guided questions to assist your progress.',
+    aiReasoning: 'Deconstructed input fields into sequential steps to minimize cognitive load.',
+    steps: [
+      {
+        id: 'step-general-1',
+        title: 'Step 1: General Details',
+        description: 'Please review and confirm your details.',
+        fields: [
+          {
+            id: 'field-general-notes',
+            name: 'notes',
+            label: 'Additional Information',
+            type: 'textarea',
+            placeholder: 'Enter any relevant details...'
+          }
+        ]
+      }
+    ],
+    actions: {
+      submitLabel: 'Apply & Return to Application',
+      cancelLabel: 'Use Standard View'
+    }
+  }
+};
+
+export const SECTION_FIELD_RESTRICTIONS = {
+  studentInfo: {
+    allowed: ['fullName', 'dob', 'email', 'phone', 'notes'],
+    forbidden: ['hasExistingLoan', 'loanAmount', 'studyLocation', 'cgpa', 'college', 'annualIncome']
+  },
+  academicInfo: {
+    allowed: ['college', 'course', 'specialization', 'cgpa', 'yearOfStudy', 'studyLevel', 'notes'],
+    forbidden: ['hasExistingLoan', 'existingLoanAmount', 'annualIncome', 'hasExistingLoans', 'creditScore']
+  },
+  loanInfo: {
+    allowed: ['loanAmount', 'purpose', 'notes'],
+    forbidden: ['hasExistingLoan', 'hasExistingLoans', 'creditScore', 'studyLocation', 'fullName', 'dob']
+  },
+  studyLocation: {
+    allowed: [
+      'studyLocation', 'country', 'city', 'university', 'college', 'course',
+      'intake', 'studyLevel', 'courseDuration', 'purpose', 'destinationCountry',
+      'programName', 'degreeType', 'campusLocation', 'notes'
+    ],
+    forbidden: [
+      'hasExistingLoan', 'hasExistingLoans', 'existingLoanType', 'loanType',
+      'existingLoanAmount', 'existingLoanEmi', 'monthlyEmi',
+      'monthlyPayment', 'existingLoanRemaining', 'outstandingBalance',
+      'lenderName', 'creditScore', 'creditScoreSource', 'creditVerificationStatus',
+      'creditRemarks', 'noLoanComment'
+    ]
+  },
+  existingLoansAndCredit: {
+    allowed: [
+      'hasExistingLoan', 'hasExistingLoans', 'existingLoanType', 'loanType',
+      'existingLoanAmount', 'existingLoanEmi', 'existingLoanRemaining',
+      'creditScore', 'creditScoreSource', 'creditVerificationStatus',
+      'creditRemarks', 'monthlyEmi', 'monthlyPayment', 'outstandingBalance',
+      'lenderName', 'noLoanComment'
+    ],
+    forbidden: [
+      'studyLocation', 'country', 'city', 'university', 'intake', 'studyLevel', 'fullName', 'dob'
+    ]
+  },
+  coApplicantInfo: {
+    allowed: ['coApplicantRelation', 'coApplicantOccupation', 'annualIncome', 'notes'],
+    forbidden: ['studyLocation', 'hasExistingLoan', 'cgpa', 'dob', 'college']
+  },
+  documents: {
+    allowed: ['admissionLetter', 'incomeProof', 'academicCertificate', 'notes'],
+    forbidden: ['hasExistingLoan', 'existingLoanAmount', 'creditScore', 'cgpa']
   }
 };
 
 /**
+ * Validates that the spec does not contain fields forbidden in the targetSection.
+ */
+export function validateSectionFields(spec, targetSection) {
+  const restriction = SECTION_FIELD_RESTRICTIONS[targetSection];
+  if (!restriction) return { valid: true };
+
+  const allFieldNames = [];
+  for (const step of spec.steps || []) {
+    for (const field of step.fields || []) {
+      if (field.name) {
+        allFieldNames.push(field.name);
+      }
+    }
+  }
+
+  // Check for forbidden fields
+  const forbiddenFound = allFieldNames.filter(name => {
+    const lowerName = name.toLowerCase();
+    return restriction.forbidden.some(f => lowerName === f.toLowerCase() || (lowerName.includes(f.toLowerCase()) && !restriction.allowed.includes(name)));
+  });
+
+  if (forbiddenFound.length > 0) {
+    return {
+      valid: false,
+      reason: `Specification for section "${targetSection}" contains forbidden fields: ${forbiddenFound.join(', ')}`
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Returns the verified static fallback UI spec for a given section.
+ */
+export function getStaticFallbackSpec(section = 'studentInfo') {
+  console.log(`[Backend AI Generator] Selected fallback specification for section: "${section}"`);
+  const fallback = FALLBACK_SPECS[section] || FALLBACK_SPECS.generic || FALLBACK_SPECS.studentInfo;
+  const validationResult = validateUiSpec(fallback);
+  return {
+    ...(validationResult.success ? validationResult.data : fallback),
+    targetSection: section,
+    isLiveAi: false,
+    generatedBy: 'Static Fallback Template',
+    generatedAt: new Date().toLocaleTimeString()
+  };
+}
+
+/**
  * Generates an adaptive, simplified step-by-step UI spec based on the user's friction metrics using Groq LLM.
- * @param {Object} context - { score, section, formState }
+ * Automatically falls back to section-specific static verified spec if Groq is unreachable, fails validation, or errors.
+ * @param {Object} context - { score, section, field, formState }
  * @returns {Object} Validated UI Specification
  */
-export async function generateAdaptiveUiSpec({ score, section = 'existingLoansAndCredit', formState = {} }) {
-  console.log(`🤖 [AuraGen AI Generator] Generating adaptive UI spec for section: ${section} (Cognitive Friction: ${score}%)`);
+export async function generateAdaptiveUiSpec({ score, section = 'studentInfo', field = null, formState = {} }) {
+  console.log(`🤖 [Backend AI Generator] Generating UI spec for section: "${section}", focused field: "${field || 'none'}" (Cognitive Friction: ${score}%)`);
 
   const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || process.env.AI_API_KEY;
   const targetModel = process.env.AI_MODEL || 'openai/gpt-oss-120b';
 
   if (apiKey) {
     try {
-      console.log(`⚡ [AuraGen LangChain Pipeline] Invoking model: ${targetModel}...`);
+      console.log(`⚡ [AuraGen LangChain Pipeline] Invoking model: ${targetModel} for section: "${section}" (Field: "${field}")...`);
       
       let model;
       if (apiKey.startsWith('gsk_') || process.env.GROQ_API_KEY) {
         model = new ChatGroq({
-          apiKey: apiKey,
+          apiKey: process.env.GROQ_API_KEY || apiKey,
           model: targetModel,
           temperature: 0.2
         });
@@ -160,12 +698,10 @@ export async function generateAdaptiveUiSpec({ score, section = 'existingLoansAn
         });
       }
 
-
-
       const promptTemplate = PromptTemplate.fromTemplate(`
 You are AuraGen UI Healing Engine, an expert system specializing in Generative UI and Cognitive Load reduction.
 A user filling out a financial loan form is experiencing high cognitive friction (Cognitive Load Score: {score}%).
-The user is stuck or struggling on section: "{section}".
+The user is specifically struggling with field: "{field}" inside section: "{section}".
 
 Current known form values:
 {formState}
@@ -173,12 +709,31 @@ Current known form values:
 COMPONENT SYSTEM SPECIFICATION:
 {componentDocs}
 
+STRICT SECTION ISOLATION RULES:
+- You MUST ONLY generate fields and steps strictly relevant to the requested section: "{section}".
+- If "{section}" is "studentInfo":
+  * Generate ONLY applicant personal contact details: Full Name, Date of Birth, Email Address, Phone Number.
+- If "{section}" is "academicInfo":
+  * Generate ONLY university/college enrollment, degree/course name, specialization, CGPA (0-10), and year of study.
+- If "{section}" is "loanInfo":
+  * Generate ONLY loan amount requested and tuition/expense breakdown description.
+- If "{section}" is "studyLocation":
+  * Generate ONLY study location choices (India vs. Abroad), target country, city, university, course duration, and study level.
+- If "{section}" is "existingLoansAndCredit":
+  * Generate ONLY existing loans status (Yes/No), loan category, monthly EMI, outstanding balance, remaining months, and credit bureau score.
+- If "{section}" is "coApplicantInfo":
+  * Generate ONLY co-applicant relationship, occupation, and annual income.
+- If "{section}" is "documents":
+  * Generate ONLY admission offer letter, income proof, and academic certificate upload steps.
+- The output "targetSection" in your JSON MUST be set exactly to "{section}".
+- DO NOT INCLUDE ANY QUESTIONS BELONGING TO OTHER SECTIONS!
+
 YOUR TASK:
-Generate a simplified, multi-step "step-by-step" UI specification (JSON only) to guide the user seamlessly through the "{section}" section.
+Generate a simplified, multi-step "step-by-step" UI specification (JSON only) to guide the user seamlessly through the "{section}" section, with special focus on relieving hesitation on field "{field}".
 - Deconstruct intimidating questions into small, sequential steps (2-3 steps max).
 - Use radio buttons for yes/no branch decisions with "dependsOn" conditionals for detailed fields.
 - Include helpful placeholder values and concise helperText.
-- Include an "aiReasoning" string explaining why this UI layout relieves cognitive load for a friction score of {score}%.
+- Include an "aiReasoning" string explaining why this UI layout relieves cognitive load for a friction score of {score}% on field "{field}".
 - Output MUST be valid JSON adhering to this exact schema structure:
 {{
   "version": "1.0",
@@ -219,6 +774,7 @@ Return ONLY the raw JSON object, without markdown formatting or code blocks.
       const formattedPrompt = await promptTemplate.format({
         score: score.toString(),
         section,
+        field: field || 'general',
         formState: JSON.stringify(formState, null, 2),
         componentDocs: COMPONENT_LIBRARY_DOCS
       });
@@ -226,52 +782,54 @@ Return ONLY the raw JSON object, without markdown formatting or code blocks.
       const response = await model.invoke(formattedPrompt);
       const rawText = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
       
-      // Extract clean JSON from the LLM output
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      // Clean code block wrappers and extract JSON
+      const cleanedText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
-        throw new Error('No valid JSON returned by Groq model');
+        throw new Error('No valid JSON returned by Groq model: ' + rawText.substring(0, 100));
       }
 
       const parsedSpec = JSON.parse(jsonMatch[0]);
 
-      // Attach model metadata
+      // Enforce correct targetSection
+      parsedSpec.targetSection = section;
       parsedSpec.isLiveAi = true;
       parsedSpec.generatedBy = targetModel;
       parsedSpec.generatedAt = new Date().toLocaleTimeString();
 
-      // Validate against Zod schema
+      // 1. Validate against Zod schema
       const validationResult = validateUiSpec(parsedSpec);
-      if (validationResult.success) {
-        console.log(`✅ [AuraGen LangChain Pipeline] Successfully generated live UI Spec via ${targetModel}!`);
-        console.log(`📋 [LLM Reasoning]: "${validationResult.data.aiReasoning || 'N/A'}"`);
-        return {
-          ...validationResult.data,
-          isLiveAi: true,
-          generatedBy: targetModel,
-          generatedAt: new Date().toLocaleTimeString()
-        };
-      } else {
-        console.warn('⚠️ [AuraGen LangChain Pipeline] Generated spec failed Zod validation. Falling back to static template:', validationResult.error);
+      if (!validationResult.success) {
+        console.warn('⚠️ [AuraGen LangChain Pipeline] Generated spec failed Zod validation. Falling back to section template:', validationResult.error);
+        return getStaticFallbackSpec(section);
       }
+
+      // 2. Validate section field restrictions
+      const fieldRestrictionResult = validateSectionFields(validationResult.data, section);
+      if (!fieldRestrictionResult.valid) {
+        console.warn(`⚠️ [AuraGen LangChain Pipeline] Generated spec rejected by section rules: ${fieldRestrictionResult.reason}. Falling back to section template.`);
+        return getStaticFallbackSpec(section);
+      }
+
+      console.log(`✅ [AuraGen LangChain Pipeline] Successfully generated live UI Spec for section: "${section}" (Field: "${field}") via ${targetModel}!`);
+      console.log(`📋 [Backend AI Generator] Generated specification section: "${parsedSpec.targetSection}"`);
+      console.log(`📋 [LLM Reasoning]: "${validationResult.data.aiReasoning || 'N/A'}"`);
+      return {
+        ...validationResult.data,
+        targetSection: section,
+        isLiveAi: true,
+        generatedBy: targetModel,
+        generatedAt: new Date().toLocaleTimeString()
+      };
     } catch (llmError) {
-      console.error(`⚠️ [AuraGen LangChain Pipeline] ${targetModel} generation error, falling back to verified spec:`, llmError.message);
+      console.error(`⚠️ [AuraGen LangChain Pipeline] ${targetModel} generation error for section "${section}", falling back to verified spec:`, llmError.message);
     }
   } else {
-    console.log('ℹ️ [AuraGen AI Generator] No GROQ_API_KEY or OPENAI_API_KEY found in environment. Using verified template.');
+    console.log(`ℹ️ [AuraGen AI Generator] No GROQ_API_KEY found in environment. Using section fallback template for "${section}".`);
   }
 
-  // Fallback to verified static spec
-  const fallback = FALLBACK_SPECS[section] || FALLBACK_SPECS.existingLoansAndCredit;
-  const validationResult = validateUiSpec(fallback);
-  if (!validationResult.success) {
-    throw new Error('Default fallback UI Spec validation failed: ' + JSON.stringify(validationResult.error));
-  }
-  return {
-    ...validationResult.data,
-    isLiveAi: false,
-    generatedBy: 'Static Fallback Template',
-    generatedAt: new Date().toLocaleTimeString()
-  };
+  // Gracefully fallback to verified section static spec
+  return getStaticFallbackSpec(section);
 }
 
 // Export alias
