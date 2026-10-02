@@ -93,3 +93,5 @@ Visit **`http://localhost:3000`** in your browser.
 1. **Trigger via Telemetry**: Move cursor erratically, click rapidly (rage click), or stay idle on an empty field for >4.5s.
 2. **Trigger via Simulation**: Click **"Simulate Critical Friction"** on the top-right telemetry badge.
 3. Once cognitive load exceeds **80%**, the AI healing engine will activate and dynamically replace the complex section with a simplified, step-by-step guided flow.
+
+### Developed By:Pradeep Kumar singha
