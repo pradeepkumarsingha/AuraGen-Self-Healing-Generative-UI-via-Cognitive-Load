@@ -5,7 +5,7 @@ export async function handleCognitiveLoadHigh(io, socket, data) {
   const section = data.section || 'studentInfo';
   const field = data.field || null;
   console.log(`[Backend CognitiveEventService] Received COGNITIVE_LOAD_HIGH for section: "${section}", field: "${field}", Score: ${data.score}%`);
-
+// backend/src/services/cognitiveEventService.js
   try {
     const uiSpec = await generateAdaptiveUiSpec({
       score: data.score,
@@ -28,4 +28,4 @@ export async function handleCognitiveLoadHigh(io, socket, data) {
       error: error.message
     });
   }
-}
+}
