@@ -99,25 +99,32 @@ export default function DemoPage() {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Navigation & Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Link
-                href="/"
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 transition"
-              >
-                ← Back to Home
-              </Link>
-              <span className="text-slate-600">•</span>
-              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-semibold tracking-wide uppercase">
-                Interactive Demo
-              </span>
+          <div className="flex items-start gap-4">
+            <img
+              src="/logo.png"
+              alt="AuraGen Logo"
+              className="h-12 w-12 rounded-xl object-contain shadow-lg shadow-indigo-500/25 border border-indigo-500/30 bg-slate-950 mt-1 hidden sm:block"
+            />
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <Link
+                  href="/"
+                  className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 transition"
+                >
+                  ← Back to Home
+                </Link>
+                <span className="text-slate-600">•</span>
+                <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-semibold tracking-wide uppercase">
+                  Interactive Demo
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                Education Loan Application
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                Adaptive loan application with live cognitive state evaluation & dynamic UI generation.
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-              Education Loan Application
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Adaptive loan application with live cognitive state evaluation & dynamic UI generation.
-            </p>
           </div>
 
           <div className="flex items-center gap-3 self-start sm:self-center px-4 py-2 rounded-xl bg-slate-950/60 border border-slate-800">

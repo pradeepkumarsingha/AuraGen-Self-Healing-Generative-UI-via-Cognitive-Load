@@ -96,11 +96,11 @@ export default function LandingPage() {
         {/* Header / Navbar */}
         <header className="flex items-center justify-between py-4 px-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl shadow-2xl">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 p-[1px] shadow-lg shadow-indigo-500/25">
-              <div className="h-full w-full bg-slate-950 rounded-[11px] flex items-center justify-center text-lg">
-                ✨
-              </div>
-            </div>
+            <img
+              src="/logo.png"
+              alt="AuraGen Logo"
+              className="h-10 w-10 rounded-xl object-contain shadow-lg shadow-indigo-500/30 border border-indigo-500/30 bg-slate-950"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-white tracking-tight">AuraGen-AI</span>
