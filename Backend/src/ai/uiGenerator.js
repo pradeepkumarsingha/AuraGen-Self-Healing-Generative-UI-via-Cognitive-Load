@@ -1,17 +1,26 @@
-// backend/src/ai/uiGenerator.js
+// Backend/src/ai/uiGenerator.js
 import dotenv from 'dotenv';
 dotenv.config();
+import { createHash } from 'crypto';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { validateUiSpec } from '../validation/uiSpecSchema.js';
 
+// In-memory LRU-like UI cache to ensure sub-2s perceived latency
+const uiCache = new Map();
+
+function cacheKey(section, formState = {}) {
+  return createHash('sha256')
+    .update(JSON.stringify({ section, formState }))
+    .digest('hex');
+}
 
 // Component library knowledge provided to the LLM
 const COMPONENT_LIBRARY_DOCS = `
 Available UI Components in AuraGen Design System:
-- "text": Single-line string input. Supports label, placeholder, helperText, required.
-- "number": Numeric input. Supports min, max, step, placeholder, helperText, required.
+- "text": Single-line string input. Supports label, placeholder, helperText, required, defaultValue.
+- "number": Numeric input. Supports min, max, step, placeholder, helperText, required, defaultValue.
 - "email": Validated email format input.
 - "tel": Telephone/mobile input with numerical keypad mode.
 - "date": Date picker.
@@ -652,29 +661,61 @@ export function validateSectionFields(spec, targetSection) {
 }
 
 /**
- * Returns the verified static fallback UI spec for a given section.
+ * Injects existing form values into fallback or generated specs as defaultValue
  */
-export function getStaticFallbackSpec(section = 'studentInfo') {
-  console.log(`[Backend AI Generator] Selected fallback specification for section: "${section}"`);
-  const fallback = FALLBACK_SPECS[section] || FALLBACK_SPECS.generic || FALLBACK_SPECS.studentInfo;
-  const validationResult = validateUiSpec(fallback);
+function injectContextualDefaults(spec, formState = {}) {
+  if (!spec || !spec.steps) return spec;
   return {
-    ...(validationResult.success ? validationResult.data : fallback),
-    targetSection: section,
-    isLiveAi: false,
-    generatedBy: 'Static Fallback Template',
-    generatedAt: new Date().toLocaleTimeString()
+    ...spec,
+    steps: spec.steps.map(step => ({
+      ...step,
+      fields: (step.fields || []).map(field => ({
+        ...field,
+        defaultValue: formState[field.name] !== undefined ? formState[field.name] : (field.defaultValue ?? '')
+      }))
+    }))
   };
 }
 
 /**
- * Generates an adaptive, simplified step-by-step UI spec based on the user's friction metrics using Groq LLM.
- * Automatically falls back to section-specific static verified spec if Groq is unreachable, fails validation, or errors.
+ * Returns the verified static fallback UI spec for a given section.
+ */
+export function getStaticFallbackSpec(section = 'studentInfo', formState = {}) {
+  console.log(`[Backend AI Generator] Selected fallback specification for section: "${section}"`);
+  const fallback = FALLBACK_SPECS[section] || FALLBACK_SPECS.generic || FALLBACK_SPECS.studentInfo;
+  const validationResult = validateUiSpec(fallback);
+  const baseSpec = validationResult.success ? validationResult.data : fallback;
+  
+  const prepared = injectContextualDefaults({
+    ...baseSpec,
+    targetSection: section,
+    isLiveAi: false,
+    generatedBy: 'Static Fallback Template',
+    generatedAt: new Date().toLocaleTimeString()
+  }, formState);
+
+  return prepared;
+}
+
+/**
+ * Generates an adaptive, simplified step-by-step UI spec based on the user's friction metrics using Groq/OpenAI/Gemini LLM.
+ * Includes in-memory hashing cache to achieve sub-2s response latency and robust static fallbacks.
  * @param {Object} context - { score, section, field, formState }
- * @returns {Object} Validated UI Specification
+ * @returns {Object} Validated UI Specification or Result Object { spec, cached }
  */
 export async function generateAdaptiveUiSpec({ score, section = 'studentInfo', field = null, formState = {} }) {
   console.log(`🤖 [Backend AI Generator] Generating UI spec for section: "${section}", focused field: "${field || 'none'}" (Cognitive Friction: ${score}%)`);
+
+  // 1. Latency Optimization: Check In-Memory SHA-256 Cache
+  const key = cacheKey(section, formState);
+  if (uiCache.has(key)) {
+    console.log(`⚡ [Cache Hit] Reusing generated UI spec from memory for section: "${section}"`);
+    const cachedSpec = uiCache.get(key);
+    const resultObj = { spec: cachedSpec, cached: true };
+    // Attach spec properties to resultObj for seamless backward compatibility
+    Object.assign(resultObj, cachedSpec);
+    return resultObj;
+  }
 
   const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || process.env.AI_API_KEY;
   const targetModel = process.env.AI_MODEL || 'openai/gpt-oss-120b';
@@ -703,7 +744,7 @@ You are AuraGen UI Healing Engine, an expert system specializing in Generative U
 A user filling out a financial loan form is experiencing high cognitive friction (Cognitive Load Score: {score}%).
 The user is specifically struggling with field: "{field}" inside section: "{section}".
 
-Current known form values:
+Current known form values (Contextual Awareness):
 {formState}
 
 COMPONENT SYSTEM SPECIFICATION:
@@ -728,13 +769,15 @@ STRICT SECTION ISOLATION RULES:
 - The output "targetSection" in your JSON MUST be set exactly to "{section}".
 - DO NOT INCLUDE ANY QUESTIONS BELONGING TO OTHER SECTIONS!
 
-YOUR TASK:
-Generate a simplified, multi-step "step-by-step" UI specification (JSON only) to guide the user seamlessly through the "{section}" section, with special focus on relieving hesitation on field "{field}".
+CONTEXTUAL AWARENESS & PRESERVATION RULES:
+- For each field you generate, set its "defaultValue" from formState[fieldName] if it exists in the known form values.
+- Do NOT reset, wipe, or clear existing typed values.
 - Deconstruct intimidating questions into small, sequential steps (2-3 steps max).
 - Use radio buttons for yes/no branch decisions with "dependsOn" conditionals for detailed fields.
 - Include helpful placeholder values and concise helperText.
 - Include an "aiReasoning" string explaining why this UI layout relieves cognitive load for a friction score of {score}% on field "{field}".
-- Output MUST be valid JSON adhering to this exact schema structure:
+
+JSON OUTPUT SCHEMA FORMAT:
 {{
   "version": "1.0",
   "layout": "step-by-step",
@@ -754,6 +797,7 @@ Generate a simplified, multi-step "step-by-step" UI specification (JSON only) to
           "label": "Field Label",
           "type": "radio | text | number | select | textarea",
           "required": true,
+          "defaultValue": "...",
           "placeholder": "...",
           "helperText": "...",
           "options": [ {{ "label": "...", "value": "..." }} ],
@@ -791,46 +835,48 @@ Return ONLY the raw JSON object, without markdown formatting or code blocks.
 
       const parsedSpec = JSON.parse(jsonMatch[0]);
 
-      // Enforce correct targetSection
+      // Enforce correct targetSection & metadata
       parsedSpec.targetSection = section;
       parsedSpec.isLiveAi = true;
       parsedSpec.generatedBy = targetModel;
       parsedSpec.generatedAt = new Date().toLocaleTimeString();
 
+      // Ensure defaultValue preservation
+      const contextualSpec = injectContextualDefaults(parsedSpec, formState);
+
       // 1. Validate against Zod schema
-      const validationResult = validateUiSpec(parsedSpec);
-      if (!validationResult.success) {
-        console.warn('⚠️ [AuraGen LangChain Pipeline] Generated spec failed Zod validation. Falling back to section template:', validationResult.error);
-        return getStaticFallbackSpec(section);
+      const zodValidation = validateUiSpec(contextualSpec);
+      if (!zodValidation.success) {
+        console.warn('⚠️ [Backend AI Generator] Schema validation failed:', zodValidation.error.issues);
+        throw new Error('Zod Schema validation error');
       }
 
-      // 2. Validate section field restrictions
-      const fieldRestrictionResult = validateSectionFields(validationResult.data, section);
-      if (!fieldRestrictionResult.valid) {
-        console.warn(`⚠️ [AuraGen LangChain Pipeline] Generated spec rejected by section rules: ${fieldRestrictionResult.reason}. Falling back to section template.`);
-        return getStaticFallbackSpec(section);
+      // 2. Validate section field isolation guardrails
+      const sectionIsolation = validateSectionFields(contextualSpec, section);
+      if (!sectionIsolation.valid) {
+        console.warn('⚠️ [Backend AI Generator] Section isolation violated:', sectionIsolation.reason);
+        throw new Error(sectionIsolation.reason);
       }
 
-      console.log(`✅ [AuraGen LangChain Pipeline] Successfully generated live UI Spec for section: "${section}" (Field: "${field}") via ${targetModel}!`);
-      console.log(`📋 [Backend AI Generator] Generated specification section: "${parsedSpec.targetSection}"`);
-      console.log(`📋 [LLM Reasoning]: "${validationResult.data.aiReasoning || 'N/A'}"`);
-      return {
-        ...validationResult.data,
-        targetSection: section,
-        isLiveAi: true,
-        generatedBy: targetModel,
-        generatedAt: new Date().toLocaleTimeString()
-      };
+      console.log(`✅ [Backend AI Generator] Successfully generated & validated live AI spec for: "${section}"`);
+      
+      // Store in memory cache
+      uiCache.set(key, contextualSpec);
+
+      const resultObj = { spec: contextualSpec, cached: false };
+      Object.assign(resultObj, contextualSpec);
+      return resultObj;
+
     } catch (llmError) {
-      console.error(`⚠️ [AuraGen LangChain Pipeline] ${targetModel} generation error for section "${section}", falling back to verified spec:`, llmError.message);
+      console.warn(`⚠️ [Backend AI Generator] LLM generation failed or violated constraints (${llmError.message}). Using verified fallback spec.`);
     }
-  } else {
-    console.log(`ℹ️ [AuraGen AI Generator] No GROQ_API_KEY found in environment. Using section fallback template for "${section}".`);
   }
 
-  // Gracefully fallback to verified section static spec
-  return getStaticFallbackSpec(section);
+  // Graceful Fallback
+  const fallbackSpec = getStaticFallbackSpec(section, formState);
+  const resultObj = { spec: fallbackSpec, cached: false, isFallback: true };
+  Object.assign(resultObj, fallbackSpec);
+  return resultObj;
 }
 
-// Export alias
-export const generateUiSpec = generateAdaptiveUiSpec;
+export const generateUISpec = generateAdaptiveUiSpec;

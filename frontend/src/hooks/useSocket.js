@@ -1,10 +1,13 @@
-// frontend/hooks/useSocket.js
+// frontend/src/hooks/useSocket.js
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 
 export function useSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const [socketStatus, setSocketStatus] = useState('Connecting...');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [cached, setCached] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState(null); // 'generating' | 'complete' | 'cached' | 'fallback' | 'error'
   const [lastTrigger, setLastTrigger] = useState(null);
   const socketRef = useRef(null);
 
@@ -29,17 +32,32 @@ export function useSocket() {
       console.log('❌ Socket disconnected:', reason);
       setIsConnected(false);
       setSocketStatus('Disconnected');
+      setIsGenerating(false);
     });
 
     socket.on('connect_error', (err) => {
       console.error('⚠️ Socket connection error:', err.message);
       setIsConnected(false);
       setSocketStatus('Connection Error');
+      setIsGenerating(false);
+    });
+
+    // Latency UX feedback: Generation started in backend
+    socket.on('AURAGEN_STATUS', (data) => {
+      console.log('⚡ AuraGen status update:', data);
+      if (data?.status === 'generating') {
+        setIsGenerating(true);
+        setGenerationStatus('generating');
+      }
     });
 
     // Listen for AuraGen Trigger event from backend
     socket.on('AURAGEN_TRIGGERED', (data) => {
-      console.log('⚡ AuraGen triggered:', data);
+      console.log('⚡ AuraGen triggered payload:', data);
+      setIsGenerating(false);
+      const isCached = !!data.cached;
+      setCached(isCached);
+      setGenerationStatus(data.status || (isCached ? 'cached' : 'complete'));
       setLastTrigger({
         ...data,
         timestamp: new Date().toLocaleTimeString()
@@ -63,6 +81,12 @@ export function useSocket() {
     socket: socketRef.current,
     isConnected,
     socketStatus,
+    isGenerating,
+    setIsGenerating,
+    cached,
+    setCached,
+    generationStatus,
+    setGenerationStatus,
     lastTrigger,
     setLastTrigger,
     emitEvent

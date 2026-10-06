@@ -1,4 +1,4 @@
-// backend/src/websocket/socketHandlers.js
+// Backend/src/websocket/socketHandlers.js
 import { handleCognitiveLoadHigh } from '../services/cognitiveEventService.js';
 
 export function initSocketHandlers(io) {
@@ -6,7 +6,7 @@ export function initSocketHandlers(io) {
     console.log('Client connected:', socket.id);
 
     socket.on('COGNITIVE_LOAD_HIGH', (data) => {
-      console.log('High cognitive load detected:', data);
+      console.log('High cognitive load detected from client:', socket.id, data);
       handleCognitiveLoadHigh(io, socket, data);
     });
 
